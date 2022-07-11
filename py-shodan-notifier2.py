@@ -13,10 +13,12 @@ load_dotenv(dotenv_path)
 # to compare timestamp with shodan, get timestamp as UTC
 now = datetime.datetime.utcnow()
 
+pending_days = 10
+close_days = 30
 # threshold hours. days * hours
-reopen_threshold = 30 * 24
-pending_threshold = 10 * 24
-close_threshold = 30 * 24
+reopen_threshold = close_days * 24
+pending_threshold = pending_days * 24
+close_threshold = close_days * 24
 
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL")
@@ -280,10 +282,10 @@ def update_status(db):
 
     pending_contents = ""
     close_contents = ""
-    pending_header = f'''##### Updated pending
+    pending_header = f'''##### Updated pending (threshold: {pending_days} days.)
 ID, IP, Port, Transport, Status
 '''
-    close_header = f'''##### Updated close
+    close_header = f'''##### Updated close (threshold: {close_days} days.)
 ID, IP, Port, Transport, Status
 '''
 
@@ -376,7 +378,7 @@ Have a good day!"""
     report = header + update_part_header + diff_contents + update_contents + today_part_header + today_results + footer
     print(report)
 
-    with open(os.path.join(abs_dirpath, f'logs/{today}_result.txt'), 'w') as f:
+    with open(os.path.join(abs_dirpath, f'logs/{today}_report.txt'), 'w') as f:
         f.writelines(report)
 
     try: 
